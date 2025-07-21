@@ -2,8 +2,6 @@
 
 ### **All pages are built on the CI server, stored in S3, and served as static assets.**
 
-### **DuckDB provides persistence and analytics, backing up parquet/csv files directly to the same S3 account.**
-
 ---
 
 ## 0 · Our Working Relationship
@@ -50,35 +48,7 @@ When creating a new project structure, pick fun, unhinged names for components/m
 
 ---
 
-## 4 · DuckDB Best Practices
-
-```typescript
-import duckdb from 'duckdb';
-
-const db = new duckdb.Database('s3://bucket/db/data.duckdb', {
-  s3_region: 'eu-central-1',
-});
-
-try {
-  db.exec('INSTALL s3; LOAD s3;');
-  db.exec(`
-    COPY (SELECT * FROM staging_events)
-      TO 's3://bucket/exports/events.parquet' (FORMAT PARQUET);
-  `);
-} catch (e) {
-  return Err(new DbError('Export failed', e));
-} finally {
-  db.close(); // MANDATORY - never skip this
-}
-```
-
-- One connection per build step – parallel steps should open their own DB file copies
-- Schema-migrate offline – run `duckdb -c "<DDL>"` in CI before page build
-- Backups – S3 versioning + S3 Glacier lifecycle rules; no RDS snapshot needed
-
----
-
-## 9 · Documentation Standards
+## 3 · Documentation Standards
 
 - **TSDoc** for all exports
 - **ADRs** in `/docs/adr/` for each infrastructure decision
